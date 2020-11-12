@@ -1,3 +1,9 @@
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script> -->
+<!-- <script src="{{ url_for('static', filename='js/jquery-3.5.1.slim.min.js') }}"></script> -->
+
+<!-- <script src="https://code.jquery.com/jquery-3.5.1.slim.js" integrity="sha256-DrT5NfxfbHvMHux31Lkhxg42LY6of8TaYyK50jnxRnM=" crossorigin="anonymous"></script> -->
+
+    
 {% extends 'base.html' %}
 {% include 'header.html' %}
 
@@ -38,35 +44,28 @@
             {% endif %}
             {% endwith %}
 
-
-
-
-            <form action="{{url_for('insertplace')}}" method="POST">
-
-
+            <form class="form-inline">
                 <div class="form-group">
  
                    <label>Palce Name:</label>
-                   <input type="text" class="form-control col-md-5" name="placename" required="1"placeholder="enter place name">
+                   <input type="text" class="form-control col-md-7" name="placename" id="placename" required="1"placeholder="enter place name">
  
  
                 </div>
                 <div class="form-group">
  
  
-                   <button class="btn btn-primary" type="submit">Add Place</button>
+                   <button class="btn btn-primary" type="button" id= btnPlace>Add Place</button>
  
  
                 </div>
- 
- 
-             </form>
+            </form>
+        
         </div>
-        <table class="table table-hover table-dark">
+        <table id="apenttable" class="table table-hover table-dark">
 
             <tr>
-
-                
+               
                 <th>Place Name</th>
                 
                 <th>Action</th>
@@ -81,10 +80,10 @@
                     <a href="/deleteplace/{{row.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">Delete</a>
 
                 </td>
-                
-            {% endfor %}
-
+              
             </tr>
+  
+            {% endfor %}
 
 
            
@@ -92,4 +91,70 @@
 
     </div>
 </div>
+{% endblock %}
+
+{% block extra_script %}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<!-- <script src="{{ url_for('static', filename='js/places.js') }}"></script> -->
+<script>
+    $(document).ready(function() {
+    $('#btnPlace').on('click', function(event) {
+        event.preventDefault();
+        //alert("ajax")
+        place= $('#placename').val()
+        // alert(place)
+        // $.ajax({
+        //     data : {
+        //         placename:place
+        //        // placename : $('#placename').val()
+               
+        //     },
+        //     type : 'POST',
+        //     url : '/insertplace'
+        // })
+       
+        // .done(function(data) {
+        //     if (data.error) {
+        //         $('#errorAlert').text(data.error).show();
+        //         $('#successAlert').hide();
+        //     }
+        //     else {
+        //         $('#successAlert').text(data.name).show();
+        //         $('#errorAlert').hide();
+        //     }
+        // });
+        $.ajax({
+            url: "/insertplace",
+              data: { 'placename':place
+               // "patient_type" : "OP",
+          },
+          
+          type: "POST",
+          success: function(data) {
+            console.log(data)
+            if(data.status==1){
+                str_row = `<tr>
+                
+                <td>`+data.plceobj.place+`</td>
+                <td>
+                    
+                    <a href="/deleteplace/`+data.plceobj.placeid+`" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">Delete</a>
+
+                </td>
+              
+            </tr>`
+            $("#apenttable tbody").append(str_row)
+            ("#placename").val('')
+            }
+            
+          },
+    
+          error: function(xhr) {
+           
+          }
+      });
+        
+    });
+});
+</script>
 {% endblock %}

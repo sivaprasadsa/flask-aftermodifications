@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import date
+from flask import jsonify,make_response
 app = Flask(__name__)
 
 app.secret_key = "Secret Key"
@@ -107,18 +108,25 @@ def insert():
 #add places method
 @app.route('/insertplace', methods = ['POST'])
 def insertplace():
+    #import pdb;pdb.set_trace()
     try:
         if request.method == 'POST':
-            #import pdb;pdb.set_trace()
+            
             placename = request.form['placename']        
             my_place = Places()
             my_place.placename=placename
             db.session.add(my_place)
             db.session.commit()        
-            flash("Place Inserted Successfully")
-            return redirect(url_for('Place'))
+            # flash("Place Inserted Successfully")
+            # return redirect(url_for('Place'))
+            newp = Places.query.filter_by(placename=placename).first()
+            data ={}
+            if newp:
+                data["placeid"]=str(newp.id)
+                data["place"]=newp.placename
+            return jsonify({'status':1,'plceobj':data})
     except Exception as e:
-	     return render_template("404.html")
+	     return jsonify({'status':-1})
 
 #this is our update route where we are going to update our employee
 @app.route('/update', methods = ['GET', 'POST'])
@@ -160,7 +168,7 @@ def deleteplace(id):
         db.session.delete(my_data)
         db.session.commit()
         flash("Place Deleted Successfully")
-        return redirect(url_for('Index'))
+        return redirect(url_for('Place'))
     except Exception as e:
 	     return render_template("404.html")
 #search employee
